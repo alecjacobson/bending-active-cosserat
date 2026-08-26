@@ -51,10 +51,14 @@ if(BAC_WITH_RENDER)
   # ---- polyscope (headless via EGL on Linux) ----
   set(POLYSCOPE_BACKEND_OPENGL3_GLFW OFF CACHE BOOL "" FORCE)
   set(POLYSCOPE_BACKEND_OPENGL3_EGL  ON  CACHE BOOL "" FORCE)
+  # polyscope v2.4.0 only adds its bundled `glad` under the GLFW-backend branch, but
+  # the EGL (headless) backend needs it too. Patch deps/CMakeLists.txt to add glad
+  # unconditionally when we build EGL-only. (Idempotent.)
   FetchContent_Declare(polyscope
     GIT_REPOSITORY https://github.com/nmwsharp/polyscope.git
     GIT_TAG v2.4.0
-    GIT_SHALLOW TRUE)
+    GIT_SHALLOW TRUE
+    PATCH_COMMAND bash -c "grep -q BAC_GLAD_PATCH deps/CMakeLists.txt || sed -i '1i # BAC_GLAD_PATCH\\nif(NOT TARGET glad)\\n  add_subdirectory(glad)\\nendif()' deps/CMakeLists.txt")
   FetchContent_MakeAvailable(polyscope)
 
   add_library(bac_render src/Render.cpp)
