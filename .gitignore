@@ -1,0 +1,11 @@
+/build/
+/reference/
+/results/
+*.o
+*.obj
+*.png
+*.gif
+*.mp4
+!docs/*.png
+!docs/*.gif
+.DS_Store
