@@ -1,6 +1,8 @@
 // Simple structured mesh generators + OBJ writer (no external mesh IO needed).
 #pragma once
 #include <Eigen/Core>
+#include <array>
+#include <cstdio>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -27,6 +29,29 @@ inline void makeRectangleGrid(double W, double L, int nx, int ny,
             F.row(f++) << a, b, c;
             F.row(f++) << a, c, d;
         }
+}
+
+inline bool readOBJ(const std::string& path, Eigen::MatrixXd& V, Eigen::MatrixXi& F) {
+    std::ifstream in(path);
+    if (!in.good()) return false;
+    std::vector<std::array<double, 3>> verts;
+    std::vector<std::array<int, 3>> faces;
+    std::string line;
+    while (std::getline(in, line)) {
+        if (line.size() < 2) continue;
+        if (line[0] == 'v' && line[1] == ' ') {
+            double x, y, z; sscanf(line.c_str() + 2, "%lf %lf %lf", &x, &y, &z);
+            verts.push_back({x, y, z});
+        } else if (line[0] == 'f' && line[1] == ' ') {
+            int a, b, c; sscanf(line.c_str() + 2, "%d %d %d", &a, &b, &c);
+            faces.push_back({a - 1, b - 1, c - 1});
+        }
+    }
+    V.resize(verts.size(), 3);
+    for (size_t i = 0; i < verts.size(); i++) V.row(i) << verts[i][0], verts[i][1], verts[i][2];
+    F.resize(faces.size(), 3);
+    for (size_t i = 0; i < faces.size(); i++) F.row(i) << faces[i][0], faces[i][1], faces[i][2];
+    return true;
 }
 
 inline void writeOBJ(const std::string& path, const Eigen::MatrixXd& V, const Eigen::MatrixXi& F) {

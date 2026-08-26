@@ -62,8 +62,14 @@ if(BAC_WITH_RENDER)
   target_link_libraries(bac_render PUBLIC bac_core polyscope)
   target_compile_definitions(bac_render PUBLIC BAC_WITH_RENDER)
 
-  target_link_libraries(lateral_buckling PRIVATE bac_render)
+  add_executable(render_frames apps/render_frames.cpp)
+  target_link_libraries(render_frames PRIVATE bac_render)
 
-  add_executable(drape apps/drape.cpp)
-  target_link_libraries(drape PRIVATE bac_core bac_render)
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/apps/drape.cpp)
+    add_executable(drape apps/drape.cpp)
+    target_link_libraries(drape PRIVATE bac_core bac_render)
+  endif()
 endif()
+
+add_executable(bench_solver apps/bench_solver.cpp)
+target_link_libraries(bench_solver PRIVATE bac_core)
