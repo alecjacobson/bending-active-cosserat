@@ -1,0 +1,59 @@
+
+=== W=0.100  mesh 3x32  (132 verts, 192 faces) ===
+  gamma= 40.0  max|z|=6.55731e-01  E=-3.7091e-01  it=380 conv=1
+  gamma= 38.0  max|z|=6.62941e-01  E=-3.3068e-01  it=36 conv=1
+  gamma= 36.0  max|z|=6.67846e-01  E=-2.9247e-01  it=40 conv=1
+  gamma= 34.0  max|z|=6.69220e-01  E=-2.5651e-01  it=43 conv=1
+  gamma= 32.0  max|z|=6.65163e-01  E=-2.2305e-01  it=48 conv=1
+  gamma= 30.0  max|z|=6.52623e-01  E=-1.9242e-01  it=58 conv=1
+  gamma= 28.0  max|z|=6.26393e-01  E=-1.6500e-01  it=68 conv=1
+  gamma= 26.0  max|z|=5.76748e-01  E=-1.4126e-01  it=84 conv=1
+  gamma= 24.0  max|z|=4.82413e-01  E=-1.2177e-01  it=117 conv=1
+  gamma= 22.0  max|z|=2.94900e-01  E=-1.0714e-01  it=185 conv=1
+  gamma= 20.0  max|z|=1.44676e-01  E=-9.6142e-02  it=135 conv=1
+  gamma= 18.0  max|z|=8.09278e-02  E=-8.6131e-02  it=76 conv=1
+  gamma= 16.0  max|z|=2.97398e-02  E=-7.6439e-02  it=1499 conv=0
+  gamma= 14.0  max|z|=3.62504e-09  E=-6.6875e-02  it=58 conv=1
+  gamma= 12.0  max|z|=2.79344e-11  E=-5.7317e-02  it=2 conv=1
+  gamma= 10.0  max|z|=5.89513e-14  E=-4.7761e-02  it=2 conv=1
+  gamma=  8.0  max|z|=5.79942e-17  E=-3.8206e-02  it=2 conv=1
+
+=== W=0.200  mesh 6x32  (231 verts, 384 faces) ===
+  gamma= 40.0  max|z|=7.10737e-01  E=-9.6547e-01  it=376 conv=1
+  gamma= 38.0  max|z|=7.08247e-01  E=-8.8296e-01  it=43 conv=1
+  gamma= 36.0  max|z|=6.99786e-01  E=-8.0479e-01  it=48 conv=1
+  gamma= 34.0  max|z|=6.82440e-01  E=-7.3144e-01  it=57 conv=1
+  gamma= 32.0  max|z|=6.51431e-01  E=-6.6349e-01  it=67 conv=1
+  gamma= 30.0  max|z|=5.98225e-01  E=-6.0160e-01  it=88 conv=1
+  gamma= 28.0  max|z|=5.05259e-01  E=-5.4660e-01  it=112 conv=1
+  gamma= 26.0  max|z|=3.29753e-01  E=-4.9932e-01  it=177 conv=1
+  gamma= 24.0  max|z|=1.31462e-01  E=-4.5870e-01  it=184 conv=1
+  gamma= 22.0  max|z|=6.56157e-02  E=-4.2004e-01  it=76 conv=1
+  gamma= 20.0  max|z|=3.85384e-02  E=-3.8171e-01  it=42 conv=1
+  gamma= 18.0  max|z|=1.99010e-02  E=-3.4348e-01  it=37 conv=1
+  gamma= 16.0  max|z|=1.10865e-13  E=-3.0531e-01  it=54 conv=1
+  gamma= 14.0  max|z|=2.53471e-16  E=-2.6714e-01  it=2 conv=1
+  gamma= 12.0  max|z|=8.62557e-20  E=-2.2898e-01  it=2 conv=1
+  gamma= 10.0  max|z|=1.18044e-23  E=-1.9081e-01  it=2 conv=1
+  gamma=  8.0  max|z|=8.69157e-28  E=-1.5265e-01  it=2 conv=1
+
+=== W=0.300  mesh 10x32  (363 verts, 640 faces) ===
+  gamma= 40.0  max|z|=7.27366e-01  E=-1.8950e+00  it=383 conv=1
+  gamma= 38.0  max|z|=7.11641e-01  E=-1.7603e+00  it=54 conv=1
+  gamma= 36.0  max|z|=6.84664e-01  E=-1.6323e+00  it=63 conv=1
+  gamma= 34.0  max|z|=6.40455e-01  E=-1.5118e+00  it=74 conv=1
+  gamma= 32.0  max|z|=5.67975e-01  E=-1.3996e+00  it=94 conv=1
+  gamma= 30.0  max|z|=4.43255e-01  E=-1.2967e+00  it=135 conv=1
+  gamma= 28.0  max|z|=2.30213e-01  E=-1.2035e+00  it=207 conv=1
+  gamma= 26.0  max|z|=8.96606e-02  E=-1.1162e+00  it=143 conv=1
+  gamma= 24.0  max|z|=4.37013e-02  E=-1.0301e+00  it=62 conv=1
+  gamma= 22.0  max|z|=2.50775e-02  E=-9.4419e-01  it=33 conv=1
+  gamma= 20.0  max|z|=1.38556e-02  E=-8.5832e-01  it=25 conv=1
+  gamma= 18.0  max|z|=7.18715e-09  E=-7.7248e-01  it=52 conv=1
+  gamma= 16.0  max|z|=1.58281e-11  E=-6.8665e-01  it=2 conv=1
+  gamma= 14.0  max|z|=1.76891e-15  E=-6.0081e-01  it=2 conv=1
+  gamma= 12.0  max|z|=7.02996e-20  E=-5.1498e-01  it=2 conv=1
+  gamma= 10.0  max|z|=1.42845e-24  E=-4.2915e-01  it=2 conv=1
+  gamma=  8.0  max|z|=1.75577e-29  E=-3.4332e-01  it=2 conv=1
+
+Wrote results/buckling.csv and per-width OBJ frames.
