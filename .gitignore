@@ -1,12 +1,13 @@
-!docs/*.gif
-!docs/*.png
-*.gif
-*.mp4
-*.o
-*.obj
-*.png
-.DS_Store
 /build*/
-/build/
 /reference/
 /results/
+*.o
+*.obj
+*.mp4
+*.log
+.DS_Store
+
+# ignore stray images at repo root, but keep committed figures under docs/
+/*.png
+/*.gif
+!docs/**
