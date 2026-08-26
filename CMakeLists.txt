@@ -58,7 +58,7 @@ if(BAC_WITH_RENDER)
     GIT_REPOSITORY https://github.com/nmwsharp/polyscope.git
     GIT_TAG v2.4.0
     GIT_SHALLOW TRUE
-    PATCH_COMMAND bash -c "grep -q BAC_GLAD_PATCH deps/CMakeLists.txt || sed -i '1i # BAC_GLAD_PATCH\\nif(NOT TARGET glad)\\n  add_subdirectory(glad)\\nendif()' deps/CMakeLists.txt")
+    PATCH_COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch_polyscope_glad.sh)
   FetchContent_MakeAvailable(polyscope)
 
   add_library(bac_render src/Render.cpp)
