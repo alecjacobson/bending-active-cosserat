@@ -21,6 +21,11 @@ struct NewtonOptions {
     double reg0 = 1e-9;      // initial Tikhonov regularization
     bool projected = true;   // per-element PSD-projected Hessian (else true Hessian)
     bool verbose = false;
+
+    // Optional implicit-Euler inertia term:  + 0.5*coeff*(x-target)^T diag(mass) (x-target)
+    const Eigen::VectorXd* inertiaMass = nullptr;    // per-DOF lumped mass (0 for massless)
+    const Eigen::VectorXd* inertiaTarget = nullptr;  // x* = x_n + dt*v_n
+    double inertiaCoeff = 0.0;                        // 1/dt^2
 };
 
 struct NewtonResult {
@@ -51,12 +56,18 @@ NewtonResult projectedNewton(const BACModel& model, Func& func,
     P.setFromTriplets(Pc.begin(), Pc.end());
     Eigen::SparseMatrix<double> PT = P.transpose();
 
+    const bool haveInertia = opt.inertiaCoeff > 0 && opt.inertiaMass && opt.inertiaTarget;
+    auto inertiaEnergy = [&](const Eigen::VectorXd& xx) -> double {
+        if (!haveInertia) return 0.0;
+        Eigen::VectorXd d = xx - *opt.inertiaTarget;
+        return 0.5 * opt.inertiaCoeff * (opt.inertiaMass->array() * d.array() * d.array()).sum();
+    };
     auto objective = [&](const Eigen::VectorXd& xx, bool& valid) -> double {
         Eigen::MatrixXd V; Eigen::VectorXd th;
         model.unpack(xx, V, th);
         valid = model.dofsValid(V, th);
         if (!valid) return std::numeric_limits<double>::infinity();
-        return func.eval(xx) - extForce.dot(xx);
+        return func.eval(xx) - extForce.dot(xx) + inertiaEnergy(xx);
     };
 
     const double stopTol = std::max(opt.tol, opt.relTol * (P * extForce).norm());
@@ -74,6 +85,16 @@ NewtonResult projectedNewton(const BACModel& model, Func& func,
         }
         g -= extForce;                 // gradient of the linear gravity potential
         double E = f - extForce.dot(x);
+        if (haveInertia) {
+            Eigen::VectorXd d = x - *opt.inertiaTarget;
+            g += opt.inertiaCoeff * (opt.inertiaMass->array() * d.array()).matrix();
+            E += inertiaEnergy(x);
+            // add coeff*mass to the Hessian diagonal
+            for (int i = 0; i < n; i++) {
+                double m = opt.inertiaCoeff * (*opt.inertiaMass)[i];
+                if (m != 0.0) H.coeffRef(i, i) += m;
+            }
+        }
 
         Eigen::VectorXd gFree = P * g;
         res.iters = it; res.gradNorm = gFree.norm(); res.energy = E;
@@ -131,6 +152,11 @@ NewtonResult projectedNewton(const BACModel& model, Func& func,
         auto [f, g] = func.eval_with_gradient(x);
         g -= extForce;
         res.energy = f - extForce.dot(x);
+        if (haveInertia) {
+            Eigen::VectorXd d = x - *opt.inertiaTarget;
+            g += opt.inertiaCoeff * (opt.inertiaMass->array() * d.array()).matrix();
+            res.energy += inertiaEnergy(x);
+        }
         res.gradNorm = (P * g).norm();
         res.converged = res.gradNorm < stopTol;
     }
