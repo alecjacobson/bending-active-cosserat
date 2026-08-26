@@ -37,6 +37,10 @@ target_link_libraries(bac_core PUBLIC Eigen3::Eigen TinyAD)
 add_executable(validate apps/validate.cpp)
 target_link_libraries(validate PRIVATE bac_core)
 
+# ---- solver test ----
+add_executable(test_solver apps/test_solver.cpp)
+target_link_libraries(test_solver PRIVATE bac_core)
+
 # ---- lateral buckling flagship ----
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/apps/lateral_buckling.cpp)
   add_executable(lateral_buckling apps/lateral_buckling.cpp)

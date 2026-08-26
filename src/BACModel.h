@@ -104,6 +104,38 @@ public:
         return a;
     }
 
+    // Validity of director DOFs: every hinge angle alpha must stay strictly inside
+    // (-pi/2, pi/2) so the tan() hinge measure stays finite (the BAC barrier).
+    bool dofsValid(const Eigen::MatrixXd& V, const Eigen::VectorXd& thetas,
+                   double margin = 1e-6) const {
+        const double lim = M_PI / 2.0 - margin;
+        for (int f = 0; f < mesh_.nFaces(); f++) {
+            Eigen::Vector3d qf[3];
+            for (int k = 0; k < 3; k++) qf[k] = V.row(mesh_.faceVertex(f, k));
+            for (int i = 0; i < 3; i++) {
+                int edge = mesh_.faceEdge(f, i);
+                double orient = (mesh_.faceEdgeOrientation(f, i) == 0) ? 1.0 : -1.0;
+                double halfTheta = 0.0;
+                int v2 = mesh_.edgeOppositeVertex(edge, 0);
+                int v3 = mesh_.edgeOppositeVertex(edge, 1);
+                if (v2 != -1 && v3 != -1) {
+                    Eigen::Vector3d Q0 = V.row(mesh_.edgeVertex(edge, 0));
+                    Eigen::Vector3d Q1 = V.row(mesh_.edgeVertex(edge, 1));
+                    Eigen::Vector3d Q2 = V.row(v2), Q3 = V.row(v3);
+                    Eigen::Vector3d n0 = (Q0 - Q2).cross(Q1 - Q2);
+                    Eigen::Vector3d n1 = (Q1 - Q3).cross(Q0 - Q3);
+                    Eigen::Vector3d axis = Q1 - Q0;
+                    double s = n0.cross(n1).dot(axis) / axis.norm();
+                    double c = n0.dot(n1) + n0.norm() * n1.norm();
+                    halfTheta = std::atan2(s, c);
+                }
+                double alpha = halfTheta + orient * thetas[edge];
+                if (!(std::abs(alpha) < lim)) return false;
+            }
+        }
+        return true;
+    }
+
     // Build the TinyAD scalar function for the total elastic energy.
     // The returned function references this model; the model must outlive it.
     auto makeEnergyFunction() const {
