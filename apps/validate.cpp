@@ -169,6 +169,24 @@ int main() {
         }
     }
 
+    // ---------------- M2e: curved (non-flat) rest state ----------------
+    {
+        std::printf("== M2e curved rest state (E(rest)=0, deforming costs energy) ==\n");
+        Eigen::MatrixXd Va; Eigen::MatrixXi Fa;
+        makeCylinderArch(0.5, 1.2, 12, 16, M_PI, Va, Fa);
+        BACModel am(Va, Fa, 5e-3, lameAlpha, lameBeta);
+        Eigen::VectorXd restTh = Eigen::VectorXd::Zero(am.nEdges());
+        am.setCurvedRest(Va, restTh);                     // curved rest from the arch
+        auto afunc = am.makeEnergyFunction();
+        auto [er, gr2] = afunc.eval_with_gradient(am.pack(Va, restTh));
+        check(std::abs(er) < 1e-16, "energy at curved rest ~ 0", er);
+        check(gr2.norm() < 1e-9, "gradient at curved rest ~ 0", gr2.norm());
+        // flattening the arch (z=0) must cost energy
+        Eigen::MatrixXd Vflat = Va; Vflat.col(2).setZero();
+        double eflat = afunc.eval(am.pack(Vflat, restTh));
+        check(eflat > 1e-3, "flattening the curved rest costs energy", eflat);
+    }
+
     std::printf("\n%s (%d failures)\n", g_fail == 0 ? "ALL PASS" : "FAILURES", g_fail);
     return g_fail == 0 ? 0 : 1;
 }

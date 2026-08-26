@@ -41,6 +41,14 @@ target_link_libraries(validate PRIVATE bac_core)
 add_executable(test_solver apps/test_solver.cpp)
 target_link_libraries(test_solver PRIVATE bac_core)
 
+# ---- dynamic drape (pure physics; writes OBJ frames, render with render_frames) ----
+add_executable(drape apps/drape.cpp)
+target_link_libraries(drape PRIVATE bac_core)
+
+# ---- curved (non-flat) rest-state arch ----
+add_executable(curved_rest apps/curved_rest.cpp)
+target_link_libraries(curved_rest PRIVATE bac_core)
+
 # ---- lateral buckling flagship ----
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/apps/lateral_buckling.cpp)
   add_executable(lateral_buckling apps/lateral_buckling.cpp)
@@ -68,11 +76,6 @@ if(BAC_WITH_RENDER)
 
   add_executable(render_frames apps/render_frames.cpp)
   target_link_libraries(render_frames PRIVATE bac_render)
-
-  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/apps/drape.cpp)
-    add_executable(drape apps/drape.cpp)
-    target_link_libraries(drape PRIVATE bac_core bac_render)
-  endif()
 endif()
 
 add_executable(bench_solver apps/bench_solver.cpp)

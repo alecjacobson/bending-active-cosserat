@@ -82,6 +82,7 @@ solver enforces `|α| < π/2` throughout the line search.
 | TinyAD Hessian vs finite differences | `2e-7` |
 | **energy vs LibShell `MidedgeAngleTanFormulation`+StVK** | **`0.0` (exact)** |
 | **gradient vs LibShell** | **`3e-13`** |
+| curved (non-flat) rest: energy & gradient at the exact rest config | `~1e-29`, `9e-14` |
 
 The last two compare, on a randomly-deformed strip, against a golden dump produced by
 linking LibShell directly (`reference/dump_golden.cpp`) — confirming this from-scratch
@@ -102,11 +103,38 @@ selection matrix):
 - iterative refinement on the linear solve;
 - optional **implicit-Euler inertia** term for dynamics.
 
+## Non-flat rest state (curved shell)
+
+<p align="center"><img src="docs/curved_rest_arch.gif" width="60%"/></p>
+
+`apps/curved_rest.cpp` builds a **curved half-cylinder arch** and defines it as the
+*rest* configuration (rest second fundamental form `b̄ ≠ 0`, via
+`BACModel::setCurvedRest`). The key correctness check is that the elastic energy at the
+exact rest configuration is `~0` (and its gradient too) — i.e. the curved shape is a
+zero-energy equilibrium — while *flattening* it costs energy. The arch is then clamped at
+its feet and released under gravity: it sags slightly but holds its curved shape (a flat
+plate would simply collapse), demonstrating the structural stiffness that comes from the
+non-flat rest. This mirrors the paper's curved benchmark geometries (e.g. HalfCylinder).
+
+```bash
+./build/curved_rest                                   # writes results/arch/f*.obj, prints E(rest)
+./build-render/render_frames out 1.7,-1.5,1.0 0,0.7,0.05 z+ 2 results/arch/f*.obj
+```
+
 ## Bonus: dynamic drape
 
 `apps/drape.cpp` steps a square sheet (StVK membrane + BAC bending + lumped inertia)
 under gravity with backward Euler, each step a projected-Newton solve of the incremental
-potential. It renders frames headlessly. `docs/drape.gif` shows the result.
+potential. It writes OBJ frames; `render_frames` turns them into `docs/drape.gif`.
+
+<p align="center"><img src="docs/drape.gif" width="46%"/></p>
+
+### Rendering notes
+
+`render_frames` renders an OBJ sequence headlessly (EGL), with a **fixed shadow floor**
+across the whole animation and an optional world-up remap (`x-`, `z+`, …) so the
+gravity/load direction points downward — e.g. the buckling frames use `x-` because the
+lateral-buckling load acts along `+x`.
 
 ## Build
 
@@ -132,9 +160,10 @@ offscreen rendering.
 ## Layout
 
 ```
-src/    MeshConnectivity, BACModel (TinyAD energy), Solver (projected Newton),
-        Meshes (grid + OBJ IO), Render (polyscope EGL)
-apps/   validate, test_solver, lateral_buckling, bench_solver, render_frames, drape
+src/    MeshConnectivity, BACModel (TinyAD energy, flat + curved rest), Solver
+        (projected Newton + inertia), Meshes (grid/arch + OBJ IO), Render (polyscope EGL)
+apps/   validate, test_solver, lateral_buckling, curved_rest, drape,
+        bench_solver, render_frames
 scripts/ plot_buckling.py, make_gif.py
 docs/   committed figures/GIFs
 reference/  (git-ignored) upstream repos used only as a validation oracle

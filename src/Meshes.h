@@ -31,6 +31,32 @@ inline void makeRectangleGrid(double W, double L, int nx, int ny,
         }
 }
 
+// A curved cylindrical arch: an arc of radius R spanning angle phiSpan in the xz-plane
+// (crown up in +z, feet at z=0), extruded along y for length Lv. Developable, so its
+// rest metric matches a flat sheet -- a clean non-flat rest (bbar != 0) test shape.
+inline void makeCylinderArch(double R, double Lv, int nu, int nv, double phiSpan,
+                             Eigen::MatrixXd& V, Eigen::MatrixXi& F) {
+    int Nu = nu + 1, Nv = nv + 1;
+    V.resize(Nu * Nv, 3);
+    auto vid = [&](int i, int j) { return j * Nu + i; };
+    for (int j = 0; j < Nv; j++)
+        for (int i = 0; i < Nu; i++) {
+            double u = double(i) / nu;                 // 0..1 across the arc
+            double phi = (u - 0.5) * phiSpan;          // centered angle
+            double x = R * std::sin(phi), z = R * std::cos(phi);
+            double y = Lv * double(j) / nv;
+            V.row(vid(i, j)) << x, y, z;
+        }
+    F.resize(2 * nu * nv, 3);
+    int f = 0;
+    for (int j = 0; j < nv; j++)
+        for (int i = 0; i < nu; i++) {
+            int a = vid(i, j), b = vid(i + 1, j), c = vid(i + 1, j + 1), d = vid(i, j + 1);
+            F.row(f++) << a, b, c;
+            F.row(f++) << a, c, d;
+        }
+}
+
 inline bool readOBJ(const std::string& path, Eigen::MatrixXd& V, Eigen::MatrixXi& F) {
     std::ifstream in(path);
     if (!in.good()) return false;

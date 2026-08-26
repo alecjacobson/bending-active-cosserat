@@ -22,17 +22,24 @@ void renderInit(int width, int height) {
     g_inited = true;
 }
 
+void renderSetFixedGround(double heightZ) {
+    polyscope::options::groundPlaneHeightMode = polyscope::GroundPlaneHeightMode::Manual;
+    polyscope::options::groundPlaneHeight = (float)heightZ;
+}
+
 void renderMeshPNG(const Eigen::MatrixXd& V, const Eigen::MatrixXi& F,
-                   const std::string& pngPath, const Camera& cam, int heightAxis) {
+                   const std::string& pngPath, const Camera& cam, int heightAxis,
+                   const Eigen::Matrix3d& R) {
     renderInit();
-    auto* m = polyscope::registerSurfaceMesh("shell", V, F);
+    Eigen::MatrixXd Vr = (V * R.transpose());           // world = R * v (row-wise)
+    auto* m = polyscope::registerSurfaceMesh("shell", Vr, F);
     m->setSurfaceColor({0.85, 0.85, 0.90});
     m->setEdgeWidth(1.0);
     m->setEdgeColor({0.2, 0.2, 0.25});
     m->setSmoothShade(true);
     if (heightAxis >= 0 && heightAxis < 3) {
         std::vector<double> h(V.rows());
-        for (int i = 0; i < V.rows(); i++) h[i] = V(i, heightAxis);
+        for (int i = 0; i < V.rows(); i++) h[i] = V(i, heightAxis);   // color by original coord
         auto* q = m->addVertexScalarQuantity("coord", h);
         q->setColorMap("coolwarm");
         q->setEnabled(true);

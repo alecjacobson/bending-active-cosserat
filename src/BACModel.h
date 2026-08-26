@@ -104,6 +104,60 @@ public:
         return a;
     }
 
+    // Per-face BAC second-fundamental-form entries (II0,II1,II2), double precision.
+    // Mirrors the TinyAD bending element exactly (validated by the "rest energy = 0"
+    // check when used to define a curved rest state).
+    Eigen::Vector3d faceIIEntries(const Eigen::MatrixXd& V, const Eigen::VectorXd& thetas,
+                                  int f) const {
+        Eigen::Vector3d qf[3];
+        for (int k = 0; k < 3; k++) qf[k] = V.row(mesh_.faceVertex(f, k));
+        Eigen::Vector3d II;
+        for (int i = 0; i < 3; i++) {
+            const Eigen::Vector3d& a0 = qf[i];
+            const Eigen::Vector3d& a1 = qf[(i + 1) % 3];
+            const Eigen::Vector3d& a2 = qf[(i + 2) % 3];
+            double altitude = (a1 - a0).cross(a2 - a0).norm() / (a2 - a1).norm();
+            int edge = mesh_.faceEdge(f, i);
+            double orient = (mesh_.faceEdgeOrientation(f, i) == 0) ? 1.0 : -1.0;
+            double halfTheta = 0.0;
+            int v2 = mesh_.edgeOppositeVertex(edge, 0);
+            int v3 = mesh_.edgeOppositeVertex(edge, 1);
+            if (v2 != -1 && v3 != -1) {
+                Eigen::Vector3d Q0 = V.row(mesh_.edgeVertex(edge, 0));
+                Eigen::Vector3d Q1 = V.row(mesh_.edgeVertex(edge, 1));
+                Eigen::Vector3d Q2 = V.row(v2), Q3 = V.row(v3);
+                Eigen::Vector3d n0 = (Q0 - Q2).cross(Q1 - Q2);
+                Eigen::Vector3d n1 = (Q1 - Q3).cross(Q0 - Q3);
+                Eigen::Vector3d axis = Q1 - Q0;
+                double s = n0.cross(n1).dot(axis) / axis.norm();
+                double c = n0.dot(n1) + n0.norm() * n1.norm();
+                halfTheta = std::atan2(s, c);
+            }
+            double alpha = halfTheta + orient * thetas[edge];
+            II[i] = 2.0 * altitude * std::tan(alpha);
+        }
+        return II;
+    }
+
+    Eigen::Matrix2d faceSecondFundamentalForm(const Eigen::MatrixXd& V,
+                                              const Eigen::VectorXd& thetas, int f) const {
+        Eigen::Vector3d II = faceIIEntries(V, thetas, f);
+        Eigen::Matrix2d b;
+        b << II[0] + II[1], II[0], II[0], II[0] + II[2];
+        return b;
+    }
+
+    // Define a curved (non-flat) rest state from a rest configuration: rest first and
+    // second fundamental forms are taken from (Vrest, thetasRest). Evaluating the energy
+    // at exactly (Vrest, thetasRest) then gives ~0.
+    void setCurvedRest(const Eigen::MatrixXd& Vrest, const Eigen::VectorXd& thetasRest) {
+        for (int f = 0; f < mesh_.nFaces(); f++) {
+            rest_.abar[f] = faceFirstFundamentalForm(Vrest, F_, f);
+            rest_.bbar[f] = faceSecondFundamentalForm(Vrest, thetasRest, f);
+        }
+        restEdgeThetas_ = thetasRest;
+    }
+
     // Validity of director DOFs: every hinge angle alpha must stay strictly inside
     // (-pi/2, pi/2) so the tan() hinge measure stays finite (the BAC barrier).
     bool dofsValid(const Eigen::MatrixXd& V, const Eigen::VectorXd& thetas,

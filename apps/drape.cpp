@@ -2,7 +2,8 @@
 // horizontal and drapes under gravity. Backward-Euler time stepping, each step a
 // projected-Newton solve of the incremental potential
 //     E_elastic(x) - g.x + (1/2 dt^2) (x - x*)^T M (x - x*),   x* = x_n + dt v_n.
-// Uses StVK membrane + BAC bending + lumped inertia. Renders frames via headless EGL.
+// Uses StVK membrane + BAC bending + lumped inertia. Writes OBJ frames (render with
+// apps/render_frames).
 //
 // Usage: drape [nx] [steps] [dt]
 #include <cstdio>
@@ -12,13 +13,12 @@
 #include "BACModel.h"
 #include "Solver.h"
 #include "Meshes.h"
-#include "Render.h"
 
 using namespace bac;
 
 int main(int argc, char** argv) {
     int n = (argc > 1) ? std::atoi(argv[1]) : 24;
-    int steps = (argc > 2) ? std::atoi(argv[2]) : 140;
+    int steps = (argc > 2) ? std::atoi(argv[2]) : 170;
     double dt = (argc > 3) ? std::atof(argv[3]) : 0.02;
 
     double W = 1.0, L = 1.0, thickness = 5e-3;
@@ -63,11 +63,7 @@ int main(int argc, char** argv) {
     Eigen::VectorXd x = model.pack(V, model.restEdgeThetas());
     Eigen::VectorXd v = Eigen::VectorXd::Zero(model.nDofs());
 
-    renderInit(1280, 960);
-    Camera cam;
-    cam.eye = {2.4, -1.9, 0.15}; cam.target = {0.5, 0.75, -0.45}; cam.up = {0, 0, 1};
     system("mkdir -p results/drape");
-
     int frame = 0;
     for (int s = 0; s < steps; s++) {
         Eigen::VectorXd xPrev = x;
@@ -83,12 +79,12 @@ int main(int argc, char** argv) {
 
         if (s % 2 == 0) {
             Eigen::MatrixXd Vc; Eigen::VectorXd th; model.unpack(x, Vc, th);
-            char fn[128]; snprintf(fn, sizeof(fn), "results/drape/f%04d.png", frame++);
-            renderMeshPNG(Vc, F, fn, cam, 2);
+            char fn[128]; snprintf(fn, sizeof(fn), "results/drape/f%04d.obj", frame++);
+            writeOBJ(fn, Vc, F);
             printf("step %3d t=%.2f  it=%d conv=%d  Etot=%.4e\n", s, s * dt, r.iters,
                    r.converged, r.energy);
         }
     }
-    printf("done: %d frames in results/drape/\n", frame);
+    printf("done: %d OBJ frames in results/drape/\n", frame);
     return 0;
 }
